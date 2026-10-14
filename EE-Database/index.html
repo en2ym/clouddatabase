@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<title>V1SU | Electrical Endurance</title>
+<script src="libs/plotly.min.js"></script>
+<script src="libs/sql-wasm.js"></script>
+<script src="libs/xlsx.full.min.js"></script>
+<script src="exper-browser.js?ee-experiment-import-v3"></script>
+<style>
+:root{--green:#0a2f24;--lime:#3dcd58;--pale:#e7ffd9;--ink:#0a2f24;--line:#b8d7c2;--muted:#587166;--white:#fff;--red:#ff595e;--blue:#1982c4;}
+*{box-sizing:border-box}html,body{margin:0;background:#f5faf3;color:var(--ink);font:14px "Segoe UI",Arial,sans-serif}body{min-height:100vh}.top{background:var(--green);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-size:24px;font-weight:800;letter-spacing:.12em}.top a{color:#fff;text-decoration:none;border:1px solid var(--pale);padding:8px 12px;border-radius:8px}.shell{max-width:1660px;margin:0 auto;padding:22px}.hero{margin-bottom:18px}.hero h1{margin:0 0 5px;font-size:30px}.hero p{margin:0;color:var(--muted)}.layout{display:grid;grid-template-columns:360px 1fr;gap:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 5px 18px rgba(10,47,36,.08)}.panel h2{font-size:18px;margin:0 0 12px;color:var(--green)}.panel h3{font-size:14px;margin:20px 0 8px}.stack{display:grid;gap:10px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}label{font-weight:600;color:var(--green)}input[type=file],select,button{font:inherit}input[type=file]{width:100%;padding:10px;border:1px dashed var(--green);border-radius:8px;background:#fbfffa}button,select{border:1px solid var(--green);border-radius:8px;background:#fff;color:var(--green);padding:8px 10px}button{cursor:pointer;font-weight:650}button:hover{background:var(--pale)}button.primary{background:var(--lime);color:var(--green)}button:disabled{opacity:.45;cursor:not-allowed}.check{font-weight:500;display:flex;align-items:center;gap:6px}.status{min-height:36px;padding:9px;border-radius:8px;background:var(--pale);color:var(--green);line-height:1.4}.status.error{background:#fff0f0;color:#9e2027}.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-bottom:16px}.metric{border:1px solid var(--line);border-radius:9px;padding:10px;background:#fbfffa}.metric b{display:block;font-size:20px;color:var(--green)}.metric span{font-size:12px;color:var(--muted)}.selectors{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.selectors label{display:flex;align-items:center;gap:6px}.plot{width:100%;height:420px}.plot.small{height:310px}.charts{display:grid;gap:16px}.table-wrap{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:8px}.result-table{width:100%;border-collapse:collapse;font-size:12px}.result-table th,.result-table td{padding:7px 8px;border-bottom:1px solid #dbeadf;text-align:left;white-space:nowrap}.result-table th{position:sticky;top:0;background:var(--green);color:#fff}.result-table tr.fail{background:#fff1f1}.note{padding:10px 12px;border-left:4px solid var(--lime);background:#f1faed;color:var(--muted);line-height:1.5;font-size:12px}.footer-note{margin-top:14px;color:var(--muted);font-size:12px}@media(max-width:1050px){.layout{grid-template-columns:1fr}.metric-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}}@media(max-width:600px){.shell{padding:12px}.top{padding:14px 16px}.metric-grid{grid-template-columns:1fr 1fr}.plot{height:360px}}
+</style>
+<style id="comparisonChartStyles">
+#trendPlot{height:490px}
+</style>
+<style id="dataLayoutStyles">
+.layout{grid-template-columns:360px minmax(0,1fr);grid-template-areas:"import comparison" "waveform waveform";align-items:start}
+.import-panel{grid-area:import;min-width:0}
+.comparison-panel{grid-area:comparison;min-width:0}
+.waveform-panel{grid-area:waveform;min-width:0}
+@media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"import" "comparison" "waveform"}}
+</style>
+<style id="waveformRecordStyles">
+.waveform-record-controls{display:grid;gap:8px;margin-bottom:10px}
+.waveform-record-summary{font-size:11px;color:var(--muted);font-weight:400}
+.waveform-record-filter-row input{flex:1;min-width:180px;padding:8px;border:1px solid var(--line);border-radius:8px}
+.waveform-record-list{display:grid;gap:4px;max-height:170px;overflow:auto;padding:6px;border:1px solid var(--line);border-radius:8px;background:#fbfffa}
+.waveform-record-item{display:grid;grid-template-columns:18px minmax(0,1fr);gap:2px 8px;align-items:start;padding:6px 4px;border-bottom:1px solid var(--line);font-weight:500}
+.waveform-record-item:hover{background:var(--pale)}
+.waveform-record-item input{grid-row:1/span 2;margin:2px 0 0}
+.waveform-record-name{overflow-wrap:anywhere}
+.waveform-record-meta{font-size:11px;color:var(--muted);font-weight:400;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">V1SU</div><a href="index.html">Back to databases</a></header>
+<main class="shell">
+  <section class="hero"><h1>Electrical Endurance</h1><p>Browser-side SQLite, Excel, CSV and TDMS import with interruption-waveform analysis.</p></section>
+  <div class="layout">
+    <aside class="panel import-panel">
+      <h2>Import and extract</h2>
+      <div class="stack">
+        <button id="loadBundled" class="primary">Load dedicated SQLite database</button>
+        <label>Import SQLite, Excel, or CSV<input id="dataImportInput" type="file" accept=".sqlite,.sqlite3,.db,.db3,.xlsx,.xls,.csv" multiple></label>
+        <label>TDMS files or folder<input id="tdmsInput" type="file" accept=".tdms" multiple webkitdirectory></label>
+        <label class="check"><input id="mergeBundled" type="checkbox" checked> Merge with bundled electrical-life data</label>
+        <div class="row"><button id="clearImported">Clear imported</button><button id="exportCsv">Export CSV</button><button id="exportSqlite">Export SQLite</button></div>
+        <div id="status" class="status">Loading dedicated electrical-life database...</div>
+      </div>
+    </aside>
+    <section class="panel comparison-panel">
+      <h2>Comparison</h2>
+      <div id="metrics" class="metric-grid"></div>
+      <div id="trendPlot" class="plot small"></div>
+    </section>
+    <section class="panel waveform-panel">
+      <h2>Selected interruption waveform</h2>
+      <div class="waveform-record-controls">
+        <div class="row">
+          <button id="waveformRecordSelectVisible" class="primary">Select visible</button>
+          <button id="waveformRecordClear">Clear selection</button>
+          <span id="waveformRecordSummary" class="waveform-record-summary">0 selected / 0 records</span>
+        </div>
+        <div class="row waveform-record-filter-row"><label for="waveformRecordFilter">Filter records</label><input id="waveformRecordFilter" type="search" placeholder="Parameter, sample, operation, or file"></div>
+        <div id="waveformRecordList" class="waveform-record-list" aria-label="Selectable interruption records"></div>
+      </div>
+      <div id="recordInfo" class="note">Select one or more interruption records.</div>
+      <div id="waveformPlot" class="plot"></div>
+    </section>
+  </div>
+</main>
+<script src="EE-Database/electrical-life.js?experiment-series-v25"></script>
+</body>
+</html>
